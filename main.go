@@ -2,8 +2,12 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
 	_ "embed"
+	"flag"
 	"fmt"
+	"log"
+	"math/big"
 	"strings"
 )
 
@@ -11,8 +15,14 @@ import (
 var wordList string
 
 func main() {
+	numWords := flag.Int("n", 10, "Number of words to generate")
+	flag.Parse()
 	words := loadWords()
-	for _, word := range words {
+	for i := 0; i < *numWords; i++ {
+		word, err := randWord(words)
+		if err != nil {
+			log.Fatal(err)
+		}
 		fmt.Println(word)
 	}
 }
@@ -27,4 +37,12 @@ func loadWords() []string {
 		words = append(words, scanner.Text())
 	}
 	return words
+}
+
+func randWord(words []string) (string, error) {
+	idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(words))))
+	if err != nil {
+		return "", err
+	}
+	return words[idx.Uint64()], nil
 }
